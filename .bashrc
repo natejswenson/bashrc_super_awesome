@@ -86,21 +86,15 @@ docker rm -f $(docker ps -a -q)
 docker rmi -f $(docker images -q -a ) 
 }
 dockertag(){
-docker tag $1 ghiartiprd01.lhi.com/docker-local/jenkinsci/"$2"
-docker push ghiartiprd01.lhi.com/docker-local/jenkinsci/"$2"
+docker tag $1{*}/docker-local/jenkinsci/"$2"
+docker push {*}/docker-local/jenkinsci/"$2"
 }
 dockerpush() {
-docker push ghiartiprd01.lhi.com/docker-local/jenkinsci/"$2"
+docker push {*}/docker-local/jenkinsci/"$2"
 }
 docker-it(){
 	docker exec -it "$*" bash
 }
-
-ftp1() {
-#sftp -i ~/.ssh/id_rsa vaccn_devops@ftp3.logisticshealth.com
-sftp vaccn_devops@ftp3.logisticshealth.com
-}
-alias ftpserver=ftp1
 
 #######################################################
 # GENERAL ALIAS'S
