@@ -1,0 +1,5 @@
+gp() ={
+git stage $1
+git commit -m"$2"
+git push
+}

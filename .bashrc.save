@@ -180,12 +180,6 @@ alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' 
 alias sha1='openssl sha1'
 #GIT FUNCTIONS
 
-gp(){
-git stage $1
-git commit -m"$2" 
-git push
-}
-alias gp=gp()
 #######################################################
 # SPECIAL FUNCTIONS
 #######################################################
