@@ -2,7 +2,7 @@
 iatest=$(expr index "$-" i)
 
 #######################################################
-# SOURCED ALIAS'S AND SCRIPTS
+# SOURCED ALIAS'S AND SCRIPTS BY zachbrowne.me
 #######################################################
 
 # Source global definitions
@@ -48,17 +48,12 @@ if [[ $iatest > 0 ]]; then bind "set completion-ignore-case on"; fi
 # Show auto-completion list automatically, without double tab
 if [[ $iatest > 0 ]]; then bind "set show-all-if-ambiguous On"; fi
 
-# Set the default editor
-export EDITOR=nano
-export VISUAL=nano
-alias pico='edit'
-alias spico='sedit'
-alias nano='edit'
-alias snano='sedit'
-
 # To have colors for ls and all grep commands such as grep, egrep and zgrep
 export CLICOLOR=1
 export LS_COLORS='no=00:fi=00:di=00;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:*.xml=00;31:'
+#export GREP_OPTIONS='--color=auto' #deprecated
+alias grep="/bin/grep $GREP_OPTIONS"
+unset GREP_OPTIONS
 
 # Color for manpages in less makes manpages a little easier to read
 export LESS_TERMCAP_mb=$'\E[01;31m'
@@ -70,40 +65,7 @@ export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[01;32m'
 
 #######################################################
-# GITHUB DOCKER ARTIFACTORY
-#######################################################
 
-# GitHub
-gitpush() {
-    git add .
-    git commit -m "$*"
-    git push
-}
-alias gp=gitpush
-
-docker-clean() { 
-docker rm -f $(docker ps -a -q)
-docker rmi -f $(docker images -q -a ) 
-}
-dockertag(){
-docker tag $1{*}/docker-local/jenkinsci/"$2"
-docker push {*}/docker-local/jenkinsci/"$2"
-}
-dockerpush() {
-docker push {*}/docker-local/jenkinsci/"$2"
-}
-docker-it(){
-	docker exec -it "$*" bash
-}
-
-#######################################################
-# GENERAL ALIAS'S
-#######################################################
-# To temporarily bypass an alias, we preceed the command with a \
-# EG: the ls command is aliased, but to use the normal ls command you would type \ls
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Edit this .bashrc file
@@ -144,8 +106,6 @@ alias bd='cd "$OLDPWD"'
 
 # Remove a directory and all files
 alias rmd='/bin/rm  --recursive --force --verbose '
-
-
 
 # Alias's for multiple directory listing commands
 alias la='ls -Alh' # show hidden files
@@ -222,9 +182,29 @@ alias sha1='openssl sha1'
 #######################################################
 # SPECIAL FUNCTIONS
 #######################################################
-
-
-
+# Extracts any archive(s) (if unp isn't installed)
+extract () {
+	for archive in $*; do
+		if [ -f $archive ] ; then
+			case $archive in
+				*.tar.bz2)   tar xvjf $archive    ;;
+				*.tar.gz)    tar xvzf $archive    ;;
+				*.bz2)       bunzip2 $archive     ;;
+				*.rar)       rar x $archive       ;;
+				*.gz)        gunzip $archive      ;;
+				*.tar)       tar xvf $archive     ;;
+				*.tbz2)      tar xvjf $archive    ;;
+				*.tgz)       tar xvzf $archive    ;;
+				*.zip)       unzip $archive       ;;
+				*.Z)         uncompress $archive  ;;
+				*.7z)        7z x $archive        ;;
+				*)           echo "don't know how to extract '$archive'..." ;;
+			esac
+		else
+			echo "'$archive' is not a valid file!"
+		fi
+	done
+}
 
 # Searches for text in all files in the current folder
 ftext ()
@@ -303,21 +283,16 @@ up ()
 	cd $d
 }
 
-#Automatically do an ls after each cd
- cd ()
- {
- 	if [ -n "$1" ]; then
- 		builtin cd "$@" && ls
- 	else
- 		builtin cd ~ && ls
- 	fi
- }
+
 
 # Returns the last 2 fields of the working directory
 pwdtail ()
 {
 	pwd|awk -F/ '{nlast = NF -1;print $nlast"/"$NF}'
 }
+
+
+
 
 # Show current network information
 netinfo ()
@@ -333,7 +308,19 @@ netinfo ()
 	echo "---------------------------------------------------"
 }
 
+# IP address lookup
+alias whatismyip="whatsmyip"
+function whatsmyip ()
+{
+	# Dumps a list of all IP addresses for every device
+	# /sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }';
 
+	# Internal IP Lookup
+	echo -n "Internal IP: " ; /sbin/ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}'
+
+	# External IP Lookup
+	echo -n "External IP: " ; wget http://smart-ip.net/myip -O - -q
+}
 
 
 
@@ -429,17 +416,6 @@ function __setprompt
 	# Date
 	PS1+="\[${DARKGRAY}\](\[${CYAN}\]\$(date +%a) $(date +%b-'%-m')" # Date
 	PS1+="${BLUE} $(date +'%-I':%M:%S%P)\[${DARKGRAY}\])-" # Time
-
-	# CPU
-	PS1+="(\[${MAGENTA}\]CPU $(cpu)%"
-
-	# Jobs
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]\j"
-
-	# Network Connections (for a server - comment out for non-server)
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]Net $(awk 'END {print NR}' /proc/net/tcp)"
-
-	PS1+="\[${DARKGRAY}\])-"
 
 	# User and server
 	local SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`
